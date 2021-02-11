@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-type" content="text/html;charset=UTF-8" />
+        <meta name="viewport" content="width=device-width, maximum-scale=1.0" />
+        <title>GNotKG Gebührentabelle</title>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.1/css/bulma.min.css">
+        <script>
+            const GEBUEHRENSATZ_A = 'GEBUEHRENSATZ_A';
+            const GEBUEHRENSATZ_B = 'GEBUEHRENSATZ_B';
+            const STAFFELFAKTOR = 'STAFFELFAKTOR';
+            const MINDESTGESCHAEFTSWERT = 500;
+
+            // https://www.gesetze-im-internet.de/gnotkg/__35.html
+            const MAXIMALGESCHAEFTSWERT_A = 30000000;
+            const MAXIMALGESCHAEFTSWERT_B = 60000000;
+
+            // https://www.gesetze-im-internet.de/gnotkg/__34.html
+            const MINDESTGEBUEHR = 15;
+            const MINDESTGEBUEHR_A = 38;
+            const MINDESTGEBUEHR_B = 15;
+
+            const STAFFELUNG = {
+                500: {
+                    STAFFELFAKTOR: 500,
+                    GEBUEHRENSATZ_A: 20,
+                    GEBUEHRENSATZ_B: 4
+                },
+                2000: {
+                    STAFFELFAKTOR: 1000,
+                    GEBUEHRENSATZ_A: 21,
+                    GEBUEHRENSATZ_B: 6
+                },
+                10000: {
+                    STAFFELFAKTOR: 3000,
+                    GEBUEHRENSATZ_A: 29,
+                    GEBUEHRENSATZ_B: 8
+                },
+                25000: {
+                    STAFFELFAKTOR: 5000,
+                    GEBUEHRENSATZ_A: 38,
+                    GEBUEHRENSATZ_B: 10
+                },
+                50000: {
+                    STAFFELFAKTOR: 15000,
+                    GEBUEHRENSATZ_A: 132,
+                    GEBUEHRENSATZ_B: 27
+                },
+                200000: {
+                    STAFFELFAKTOR: 30000,
+                    GEBUEHRENSATZ_A: 198,
+                    GEBUEHRENSATZ_B: 50
+                },
+                500000: {
+                    STAFFELFAKTOR: 50000,
+                    GEBUEHRENSATZ_A: 198,
+                    GEBUEHRENSATZ_B: 80
+                },
+                5000000: {
+                    STAFFELFAKTOR: 200000,
+                    GEBUEHRENSATZ_A: 198,
+                    GEBUEHRENSATZ_B: 130
+                },
+                10000000: {
+                    STAFFELFAKTOR: 250000,
+                    GEBUEHRENSATZ_A: 198,
+                    GEBUEHRENSATZ_B: 150
+                },
+                20000000: {
+                    STAFFELFAKTOR: 500000,
+                    GEBUEHRENSATZ_A: 198,
+                    GEBUEHRENSATZ_B: 280
+                },
+                30000000: {
+                    STAFFELFAKTOR: 1000000,
+                    GEBUEHRENSATZ_A: 198,
+                    GEBUEHRENSATZ_B: 120
+                }
+            }
+
+            function berechne_staffeldaten(geschaeftswert, staffelgbuehr, mindestgebuehr) {
+                let wert_02 = (staffelgbuehr * 0.2);
+                wert_02 = ((wert_02 < mindestgebuehr) ? mindestgebuehr : wert_02);
+                let wert_03 = (staffelgbuehr * 0.3);
+                wert_03 = ((wert_03 < mindestgebuehr) ? mindestgebuehr : wert_03);
+                let wert_05 = (staffelgbuehr * 0.5);
+                wert_05 = ((wert_05 < mindestgebuehr) ? mindestgebuehr : wert_05);
+                let wert_06 = (staffelgbuehr * 0.6);
+                wert_06 = ((wert_06 < mindestgebuehr) ? mindestgebuehr : wert_06);
+                let staffeldaten = [geschaeftswert, wert_02, wert_03, wert_05, wert_06, staffelgbuehr, staffelgbuehr * 2];
+                return staffeldaten
+            }
+
+            function berechne_tabelle_a() {
+                let var_geschaeftswert = MINDESTGESCHAEFTSWERT;
+                let var_staffelgebuehr = MINDESTGEBUEHR_A;
+                let var_staffelfaktor = null;
+                let var_gebuehrensatz = null;
+                let gebuehren_tabelle = new Array();
+
+                // Erste Zeile manuell (do while sozusagen)
+                var_staffelfaktor = STAFFELUNG[var_geschaeftswert][STAFFELFAKTOR];
+                var_gebuehrensatz = STAFFELUNG[var_geschaeftswert][GEBUEHRENSATZ_A];
+                let staffeldaten = berechne_staffeldaten(var_geschaeftswert, var_staffelgebuehr, MINDESTGEBUEHR_A);
+                gebuehren_tabelle.push(staffeldaten);
+                var_geschaeftswert += var_staffelfaktor;
+                var_staffelgebuehr += var_gebuehrensatz;
+
+                // Danach programmatisch
+                while (var_geschaeftswert <= MAXIMALGESCHAEFTSWERT_A) {
+                    if (STAFFELUNG.hasOwnProperty(var_geschaeftswert)) {
+                        var_staffelfaktor = STAFFELUNG[var_geschaeftswert][STAFFELFAKTOR];
+                        var_gebuehrensatz = STAFFELUNG[var_geschaeftswert][GEBUEHRENSATZ_A];
+                    }
+                    staffeldaten = berechne_staffeldaten(var_geschaeftswert, var_staffelgebuehr, MINDESTGEBUEHR_A)
+                    gebuehren_tabelle.push(staffeldaten);
+                    var_geschaeftswert += var_staffelfaktor;
+                    var_staffelgebuehr += var_gebuehrensatz;
+                }
+                return gebuehren_tabelle;
+            }
+
+            function berechne_tabelle_b() {
+                let var_geschaeftswert = MINDESTGESCHAEFTSWERT;
+                let var_staffelgebuehr = MINDESTGEBUEHR_B;
+                let var_staffelfaktor = null;
+                let var_gebuehrensatz = null;
+                let gebuehren_tabelle = new Array();
+
+                // Erste Zeile manuell (do while sozusagen)
+                var_staffelfaktor = STAFFELUNG[var_geschaeftswert][STAFFELFAKTOR];
+                var_gebuehrensatz = STAFFELUNG[var_geschaeftswert][GEBUEHRENSATZ_B];
+                let staffeldaten = berechne_staffeldaten(var_geschaeftswert, var_staffelgebuehr, MINDESTGEBUEHR_B);
+                gebuehren_tabelle.push(staffeldaten);
+                var_geschaeftswert += var_staffelfaktor;
+                var_staffelgebuehr += var_gebuehrensatz;
+
+                // Danach programmatisch
+                while (var_geschaeftswert <= MAXIMALGESCHAEFTSWERT_B) {
+                    if (STAFFELUNG.hasOwnProperty(var_geschaeftswert)) {
+                        var_staffelfaktor = STAFFELUNG[var_geschaeftswert][STAFFELFAKTOR];
+                        var_gebuehrensatz = STAFFELUNG[var_geschaeftswert][GEBUEHRENSATZ_B];
+                    }
+                    staffeldaten = berechne_staffeldaten(var_geschaeftswert, var_staffelgebuehr, MINDESTGEBUEHR_B)
+                    gebuehren_tabelle.push(staffeldaten);
+                    var_geschaeftswert += var_staffelfaktor;
+                    var_staffelgebuehr += var_gebuehrensatz;
+                }
+                return gebuehren_tabelle;
+            }
+        </script>
+    </head>
+    <body>
+        <div class="container">
+            <h1 class="title">GNotKG Gebührentabelle A&nbsp;<button type="button" class="button" onclick="zeichne_tabelle('a_body', TABELLE_A)">Berechnen</button></h1>
+            <div class="field has-addons">
+                <div class="control">
+                  <input id="a_wert" class="input" type="number" placeholder="1234">
+                </div>
+                <div class="control">
+                  <button type="button" class="button is-info" onclick="filter_wert('a_body', document.getElementById('a_wert').value)">Filter</button>
+                </div>
+            </div>
+            <table id="a" class="table is-bordered is-striped is-hoverable has-text-right">
+                <thead >
+                    <tr>
+                        <td>Wert bis...</td><td>0,2</td><td>0,3</td><td>0,5</td><td>0,6</td><td>1,0</td><td>2,0</td>
+                    </tr>
+                </thead>
+                <tbody id="a_body"></tbody>
+            </table>
+            <br />
+            <hr>
+            <br />
+            <h1 class="title">GNotKG Gebührentabelle B&nbsp;<button type="button" class="button" onclick="zeichne_tabelle('b_body', TABELLE_B)">Berechnen</button></h1>
+            <div class="field has-addons">
+                <div class="control">
+                  <input id="b_wert" class="input" type="number" placeholder="1234">
+                </div>
+                <div class="control">
+                  <button type="button" class="button is-info" onclick="filter_wert('b_body', document.getElementById('b_wert').value)">Filter</button>
+                </div>
+            </div>
+            <table id="b" class="table is-bordered is-striped is-hoverable has-text-right">
+                <thead>
+                    <tr>
+                        <td>Wert bis...</td><td>0,2</td><td>0,3</td><td>0,5</td><td>0,6</td><td>1,0</td><td>2,0</td>
+                    </tr>
+                </thead>
+                <tbody id="b_body"></tbody>
+            </table>
+        </div>
+    </body>
+    <script>
+        function zeichne_tabelle(body_id, data) {
+            let tbody = document.getElementById(body_id);
+            while (tbody.firstChild) {
+                tbody.removeChild(tbody.lastChild);
+            }
+            for (var i = 0; i < data.length; i++) {
+                let row = document.createElement('tr');
+                let wert_bis = document.createElement('td');
+                wert_bis.innerHTML = data[i][0].toLocaleString();
+                wert_bis.dataset.value = data[i][0];
+                let wert02 = document.createElement('td');
+                wert02.innerHTML = data[i][1].toLocaleString(undefined, {minimumFractionDigits: 2});;
+                wert02.dataset.value = data[i][1];
+                let wert03 = document.createElement('td');
+                wert03.innerHTML = data[i][2].toLocaleString(undefined, {minimumFractionDigits: 2});;
+                wert03.dataset.value = data[i][2];
+                let wert05 = document.createElement('td');
+                wert05.innerHTML = data[i][3].toLocaleString(undefined, {minimumFractionDigits: 2});;
+                wert05.dataset.value = data[i][3];
+                let wert06 = document.createElement('td');
+                wert06.innerHTML = data[i][4].toLocaleString(undefined, {minimumFractionDigits: 2});;
+                wert06.dataset.value = data[i][4];
+                let wert10 = document.createElement('td');
+                wert10.innerHTML = data[i][5].toLocaleString(undefined, {minimumFractionDigits: 2});;
+                wert10.dataset.value = data[i][5];
+                let wert20 = document.createElement('td');
+                wert20.innerHTML = data[i][6].toLocaleString(undefined, {minimumFractionDigits: 2});;
+                wert20.dataset.value = data[i][6];
+                row.appendChild(wert_bis);
+                row.appendChild(wert02);
+                row.appendChild(wert03);
+                row.appendChild(wert05);
+                row.appendChild(wert06);
+                row.appendChild(wert10);
+                row.appendChild(wert20);
+                tbody.appendChild(row);
+            }
+        }
+
+        const TABELLE_A = berechne_tabelle_a();
+        const TABELLE_B = berechne_tabelle_b();
+
+        function filter_wert(body_id, geschaeftswert) {
+            let tbody = document.getElementById(body_id);
+            let items = [ ...tbody.childNodes ];
+            let alte_nodes = new Array();
+            items.forEach(function(item){
+                let wert_bis = parseFloat(item.firstChild.dataset.value);
+                if (geschaeftswert > wert_bis) {
+                    item.remove();
+                }
+                else if (geschaeftswert <= wert_bis) {
+                    alte_nodes.push(item);
+                }
+            });
+            for (var i = 1; i < alte_nodes.length; i++) {
+                alte_nodes[i].remove();
+            }
+        }
+    </script>
+</html>
